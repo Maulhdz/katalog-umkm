@@ -5,50 +5,75 @@ Catat prompt penting selama membangun aplikasi: apa yang kamu minta, hasilnya, d
 ## US-01 Katalog dari database
 
 **Prompt:**
+Baca AGENTS.md dan docs/user-stories.md bagian US-01.
+Ubah app/page.jsx supaya daftar produk diambil dari tabel "produk" di Supabase, di sisi server, memakai SUPABASE_URL dan SUPABASE_SECRET_KEY dari environment variable. Buat koneksi Supabase untuk server di folder lib/supabase.
+Tampilkan produk dengan komponen KartuProduk yang sudah ada, tanpa mengubah tampilannya. Kalau gagal mengambil data, tampilkan pesan error yang jelas di halaman. Kalau tabel kosong, tampilkan tulisan "Belum ada produk". Hapus CatatanBelumAktif dari halaman ini.
 
 **Hasil:**
+Berhasil dan sesuai harapan. Data produk muncul di beranda dan halaman kosong menampikan tulisan dengan benar.
 
 **Perbaikan:**
+Mendapatkan peringatan *deprecated* `baseUrl` dari TS/JS, yang diatasi dengan menambahkan `"ignoreDeprecations": "6.0"` di file `jsconfig.json`. Sempat terjadi `TypeError: fetch failed` yang diperbaiki cukup dengan me-restart development server (`npm run dev`).
 
 ## US-02 Detail produk
 
 **Prompt:**
+Baca docs/user-stories.md bagian US-02.
+Ubah app/produk/[id]/page.jsx supaya mengambil satu produk dari tabel "produk" di Supabase berdasarkan id di URL, di sisi server, memakai koneksi Supabase yang sudah dibuat di lib/supabase. Kalau produk tidak ditemukan, panggil notFound(). Jangan ubah tampilannya. Hapus CatatanBelumAktif dari halaman ini, tapi biarkan tombol WhatsApp.
 
 **Hasil:**
+Berhasil dan sesuai harapan. Halaman produk bisa memuat data berdasarkan id dan memanggil halaman 404 ketika data tidak ada.
 
 **Perbaikan:**
+Mengganti data dummy menjadi query tunggal `.eq('id', id).single()` ke Supabase `getSecretClient`. 
 
 ## US-03 Pesan via WhatsApp
 
 **Prompt:**
+Baca docs/rancangan-teknis.md bagian "Pesan WhatsApp (US-03)".
+Ubah components/TombolWhatsApp.jsx menjadi tautan yang membuka https://wa.me/ ke nomor di lib/toko.js, dengan pesan otomatis berisi nama dan harga produk dalam format rupiah. Pesan di-encode dengan encodeURIComponent dan dibuka di tab baru. Pertahankan tampilan tombolnya. Hapus CatatanBelumAktif yang menyebut US-03 di halaman detail produk.
 
 **Hasil:**
+Sesuai harapan. Tombol membuka tab baru dengan isi pesan pesanan otomatis.
 
 **Perbaikan:**
+Tidak ada perbaikan ekstensif. Komponen sudah berjalan baik menggunakan tag tautan `<a>` dengan atribut pengaman `target="_blank" rel="noopener noreferrer"`.
 
 ## US-04 Login admin
 
 **Prompt:**
+Baca AGENTS.md bagian aturan keamanan dan docs/user-stories.md bagian US-04.
+Buat login admin memakai Supabase Auth (email dan password) dengan @supabase/ssr dan cookie, memakai SUPABASE_URL dan SUPABASE_PUBLISHABLE_KEY. Login diproses dengan Server Action di app/admin/actions.js dan disambungkan ke form di app/admin/login/page.jsx. Login berhasil diarahkan ke /admin; login gagal menampilkan pesan error yang jelas di halaman login. Buat juga tombol "Keluar" di components/NavAdmin.jsx berfungsi: mengakhiri sesi lalu kembali ke /admin/login. Jangan ubah tampilan. Hapus CatatanBelumAktif dari halaman login.
 
 **Hasil:**
+Berhasil dan sesuai harapan. Fitur masuk dan keluar berjalan dengan manajemen *cookie* sesi yang utuh.
 
 **Perbaikan:**
+Membuat fungsi bawaan `getServerClient()` di server untuk memastikan cookies dikelola dengan aman, menggunakan hook terbaru `useActionState`, dan membungkus tombol Keluar dalam `<form>` agar mendukung pemanggilan aksi server (Server Action).
 
 ## US-05 Ganti password
 
 **Prompt:**
+Baca docs/user-stories.md bagian US-05.
+Buat Server Action ganti password di app/admin/actions.js untuk admin yang sedang login, memakai Supabase Auth. Validasi di server: password baru minimal 8 karakter dan harus sama dengan konfirmasi. Tampilkan pesan berhasil atau pesan error yang jelas di halaman. Sambungkan ke form di app/admin/password/page.jsx tanpa mengubah tampilannya. Hapus CatatanBelumAktif dari halaman ini.
 
 **Hasil:**
+Berhasil sesuai harapan. Admin dapat mengganti password setelah tervalidasi minimal 8 karakter.
 
 **Perbaikan:**
+Membuat kotak pemberitahuan dinamis di atas input untuk menampilkan pesan sukses (hijau) atau gagal (merah) yang menyatu dengan *styling* Tailwind bawaan form.
 
 ## US-06 Proteksi halaman admin
 
 **Prompt:**
+Baca AGENTS.md aturan keamanan nomor 3 dan 4, dan docs/user-stories.md bagian US-06.
+Buat file proxy.js di root proyek (Next.js 16). Semua rute /admin kecuali /admin/login wajib login dengan Supabase Auth; kalau belum login, alihkan ke /admin/login. Pastikan juga setiap Server Action yang mengubah data memeriksa login di server. Hapus CatatanBelumAktif dari halaman /admin.
 
 **Hasil:**
+Berhasil setelah sedikit perbaikan. Rute `/admin` dan seluruh turunannya kini terproteksi.
 
 **Perbaikan:**
+Saat dieksekusi muncul "Build Error: Proxy is missing expected function export name" dari sistem Next.js 16. Ini berhasil diperbaiki dengan mengubah nama fungsi dari yang semula `middleware` menjadi `proxy`. Turut menambahkan pengecekan otentikasi `supabase.auth.getUser()` pada setiap aksi ubah data di server.
 
 ## Debugging dan fitur bonus
 
